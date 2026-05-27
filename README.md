@@ -1,59 +1,242 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Test Task FHR
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel-приложение с админ-панелью [Filament](https://filamentphp.com) и тремя тестовыми задачами:
 
-## About Laravel
+| Задача | Описание |
+|--------|----------|
+| **Задача 1** | Пузырьковая сортировка массива из 200 000 чисел (нативный модуль на C) |
+| **Задача 2** | CRUD составов игроков по сезонам и выгрузка SQL-дампа БД |
+| **Задача 3** | Отдельная БД с 500 000+ пользователей и пошаговая выгрузка в CSV |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Требования
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **PHP** ≥ 8.3 с расширениями: `pdo`, `pdo_sqlite`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `bcmath`
+- **Composer** 2.x
+- **Clang** — для сборки нативной сортировки (Задача 1)
+- Опционально **MySQL/MariaDB** — если нужны отдельные MySQL-базы вместо SQLite
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Проверка PHP:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php -v
+php -m | grep -E 'pdo|sqlite|mbstring'
+clang --version
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Быстрая установка
 
-## Contributing
+```bash
+git clone <repository-url> test-task-FHR
+cd test-task-FHR
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+composer install
+cp .env.example .env
+php artisan key:generate
 
-## Code of Conduct
+touch database/database.sqlite
+php artisan migrate --seed
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+php artisan task1:build-native
+php artisan task3:setup
+```
 
-## Security Vulnerabilities
+## Пошаговая установка
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 1. Зависимости
 
-## License
+```bash
+composer install
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# test-task-FHR
+Либо через встроенный скрипт (создаёт `.env`, генерирует ключ, выполняет миграции):
+
+```bash
+composer run setup
+```
+
+> Скрипт `setup` не создаёт файл SQLite и не запускает сидеры — при необходимости выполните шаги ниже вручную.
+
+### 2. Окружение
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Основные параметры в `.env`:
+
+```env
+APP_URL=http://localhost:8000
+APP_LOCALE=ru
+
+DB_CONNECTION=sqlite
+
+TASK3_DB_DRIVER=sqlite
+# TASK3_DB_DATABASE=   # по умолчанию database/task3_users.sqlite
+```
+
+### 3. Основная база данных
+
+По умолчанию используется SQLite (`database/database.sqlite`):
+
+```bash
+touch database/database.sqlite
+php artisan migrate
+php artisan db:seed
+```
+
+Сидер создаёт:
+
+- пользователя для входа в админку;
+- демо-данные для Задачи 2 (сезоны, клубы, игроки, составы).
+
+### 4. Нативная сортировка (Задача 1)
+
+Соберите исполняемый файл из `native/bubble_sort.c`:
+
+```bash
+php artisan task1:build-native
+```
+
+Проверка:
+
+```bash
+ls -l native/bubble_sort
+php artisan task1:sort --count=100
+```
+
+Без сборки страница «Сортировка» в админке покажет подсказку с этой командой.
+
+### 5. База данных Задачи 3
+
+Отдельное подключение `task3_users`. Для SQLite:
+
+```bash
+touch database/task3_users.sqlite
+php artisan task3:setup
+```
+
+Команда выполняет миграции из `database/migrations/task3` и заполняет таблицу минимум **500 001** тестовым пользователем.
+
+Полезные опции:
+
+```bash
+# пересоздать таблицы и заново заполнить
+php artisan task3:setup --fresh
+
+# указать количество пользователей (не меньше 500 001)
+php artisan task3:setup --count=600000
+```
+
+## Запуск
+
+### Локальная разработка
+
+```bash
+php artisan serve
+```
+
+Приложение будет доступно по адресу [http://127.0.0.1:8000](http://127.0.0.1:8000). Корневой URL перенаправляет на `/admin`.
+
+Для одновременного запуска сервера, очереди и логов:
+
+```bash
+composer run dev
+```
+
+> Для работы приложения в фоне (сортировка из админки, сессии, кэш) каталог `storage/` должен быть доступен на запись.
+
+### Вход в админку
+
+| Поле | Значение |
+|------|----------|
+| URL | `/admin` |
+| Email | `admin@admin.com` |
+| Пароль | `password` |
+
+## Полезные команды
+
+```bash
+# Задача 1 — сборка и запуск сортировки из консоли
+php artisan task1:build-native
+php artisan task1:sort
+php artisan task1:sort --count=200000
+
+# Задача 3 — подготовка отдельной БД
+php artisan task3:setup
+php artisan task3:setup --fresh
+
+# Миграции и сидеры основной БД
+php artisan migrate
+php artisan db:seed
+```
+
+Результаты сортировки сохраняются в `storage/app/bubble-sort-results/`.  
+CSV-выгрузки Задачи 3 — в `storage/app/task3-exports/`.
+
+## MySQL (опционально)
+
+### Основная БД
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+```bash
+php artisan migrate --seed
+```
+
+### БД Задачи 3
+
+```env
+TASK3_DB_DRIVER=mysql
+TASK3_DB_HOST=127.0.0.1
+TASK3_DB_PORT=3306
+TASK3_DB_DATABASE=task3_users
+TASK3_DB_USERNAME=root
+TASK3_DB_PASSWORD=
+```
+
+Создайте базу `task3_users` в MySQL, затем:
+
+```bash
+php artisan task3:setup --fresh
+```
+
+## Структура проекта
+
+```
+app/
+├── Console/Commands/     # task1:build-native, task1:sort, task3:setup
+├── Filament/             # страницы и ресурсы админки
+├── Http/Controllers/     # скачивание результатов сортировки и CSV
+├── Models/               # модели основной БД и task3
+└── Services/             # сортировка, выгрузка CSV, SQL-дамп
+
+database/
+├── migrations/           # основная БД
+├── migrations/task3/     # отдельная БД Задачи 3
+└── seeders/
+
+native/
+└── bubble_sort.c         # исходник нативной сортировки (→ bubble_sort)
+```
+
+## Устранение неполадок
+
+**«Исполняемый файл native/bubble_sort не найден»**  
+→ `php artisan task1:build-native` (нужен установленный `clang`).
+
+**«В тестовой базе нет пользователей» (Задача 3)**  
+→ `php artisan task3:setup`.
+
+**Ошибки миграций SQLite**  
+→ убедитесь, что файлы `database/database.sqlite` и `database/task3_users.sqlite` существуют и доступны на запись.
+
+**Сортировка из админки не стартует**  
+→ проверьте права на `storage/` и наличие `nohup` в системе (используется для фонового запуска `task1:sort`).
