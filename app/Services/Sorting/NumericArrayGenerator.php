@@ -11,16 +11,12 @@ final class NumericArrayGenerator
      *
      * @return list<int>
      */
-    public function generate(int $count, ?int $seed = null): array
+    public function generate(int $count): array
     {
-        if ($seed !== null) {
-            mt_srand($seed);
-        }
-
-        $data = [];
+        $data = array_fill(0, $count, 0);
 
         for ($index = 0; $index < $count; $index++) {
-            $data[] = random_int(-1_000_000, 1_000_000);
+            $data[$index] = random_int(-1_000_000, 1_000_000);
         }
 
         return $data;

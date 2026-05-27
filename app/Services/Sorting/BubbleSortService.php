@@ -4,90 +4,83 @@ declare(strict_types=1);
 
 namespace App\Services\Sorting;
 
+use RuntimeException;
+
 final class BubbleSortService
 {
-    /** Каждые N проходов сортировки отправляется обновление прогресса в интерфейс */
-    public const int PROGRESS_REPORT_INTERVAL = 50;
+    public function __construct(
+        private readonly NativeBubbleSort $nativeBubbleSort,
+    ) {}
 
-    /** Максимум проходов за один HTTP-шаг Livewire (дополнительный предел к времени) */
-    public const int STEP_BATCH_PASSES = 25;
+    /** Доступна ли нативная пузырьковая сортировка */
+    public function isAvailable(): bool
+    {
+        return $this->nativeBubbleSort->isAvailable();
+    }
 
-    /** Максимальная длительность одного HTTP-шага, чтобы «Остановить» успевало сработать */
-    public const float STEP_MAX_SECONDS = 1.5;
-
-    private const int CANCEL_CHECK_INTERVAL = 1_000;
+    public function unavailableReason(): ?string
+    {
+        return $this->nativeBubbleSort->unavailableReason();
+    }
 
     /**
-     * Выполняет ограниченное число проходов сортировки для пошагового выполнения.
+     * Полная сортировка по файлу до завершения.
      *
-     * @param list<int> $data
-     * @return array{completed: bool, cancelled: bool, pass: int, upper_bound: int}
+     * @param callable(int $pass, int $estimatedPasses, float $elapsedSeconds): void|null $onProgress
+     * @return array{completed: bool, pass: int, duration_seconds: float, engine: string}
      */
-    public function sortBatch(
-        array &$data,
-        int &$pass,
-        int &$upperBound,
-        int $maxPasses,
-        ?callable $shouldCancel = null,
+    public function sortFileInPlace(
+        string $sortedFilePath,
+        int $elementCount,
+        ?callable $onProgress = null,
+        int $progressInterval = 500,
     ): array {
-        $passesDone = 0;
-        $deadline = microtime(true) + self::STEP_MAX_SECONDS;
+        $this->ensureAvailable();
 
-        while ($upperBound > 0 && $passesDone < $maxPasses) {
-            if ($this->shouldCancel($shouldCancel) || microtime(true) >= $deadline) {
-                if ($this->shouldCancel($shouldCancel)) {
-                    return [
-                        'completed' => false,
-                        'cancelled' => true,
-                        'pass' => $pass,
-                        'upper_bound' => max(0, $upperBound),
-                    ];
-                }
+        $startedAt = microtime(true);
+        $pass = 0;
+        $upperBound = max(0, $elementCount - 1);
+        $estimatedPasses = max(1, $upperBound);
+        $progressInterval = max(1, $progressInterval);
 
-                break;
+        while ($upperBound > 0) {
+            $batch = $this->nativeBubbleSort->sortFileBatch(
+                $sortedFilePath,
+                $pass,
+                $upperBound,
+                $progressInterval,
+            );
+
+            if ($onProgress !== null) {
+                $onProgress($pass, $estimatedPasses, microtime(true) - $startedAt);
             }
 
-            $pass++;
-            $passesDone++;
-            $lastSwapIndex = 0;
-
-            for ($index = 0; $index < $upperBound; $index++) {
-                if ($index > 0 && $index % self::CANCEL_CHECK_INTERVAL === 0) {
-                    if ($this->shouldCancel($shouldCancel)) {
-                        return [
-                            'completed' => false,
-                            'cancelled' => true,
-                            'pass' => $pass,
-                            'upper_bound' => max(0, $upperBound),
-                        ];
-                    }
-
-                    if (microtime(true) >= $deadline) {
-                        break 2;
-                    }
-                }
-
-                if ($data[$index] > $data[$index + 1]) {
-                    $temporary = $data[$index];
-                    $data[$index] = $data[$index + 1];
-                    $data[$index + 1] = $temporary;
-                    $lastSwapIndex = $index + 1;
-                }
+            if ($batch['completed']) {
+                return [
+                    'completed' => true,
+                    'pass' => $pass,
+                    'duration_seconds' => microtime(true) - $startedAt,
+                    'engine' => 'native',
+                ];
             }
-
-            $upperBound = $lastSwapIndex - 1;
         }
 
         return [
-            'completed' => $upperBound <= 0,
-            'cancelled' => false,
+            'completed' => true,
             'pass' => $pass,
-            'upper_bound' => max(0, $upperBound),
+            'duration_seconds' => microtime(true) - $startedAt,
+            'engine' => 'native',
         ];
     }
 
-    private function shouldCancel(?callable $shouldCancel): bool
+    private function ensureAvailable(): void
     {
-        return $shouldCancel !== null && $shouldCancel();
+        if ($this->isAvailable()) {
+            return;
+        }
+
+        throw new RuntimeException(
+            $this->unavailableReason() ?? 'Нативная сортировка недоступна.',
+        );
     }
 }

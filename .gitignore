@@ -20,8 +20,12 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/native/bubble_sort
 /vendor
 _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/native/bubble_sort.dylib
+/native/bubble_sort_service
+

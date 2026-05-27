@@ -114,6 +114,27 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'task3_users' => [
+            'driver' => env('TASK3_DB_DRIVER', 'sqlite'),
+            'url' => env('TASK3_DB_URL'),
+            'host' => env('TASK3_DB_HOST', '127.0.0.1'),
+            'port' => env('TASK3_DB_PORT', '3306'),
+            'database' => env('TASK3_DB_DATABASE', database_path('task3_users.sqlite')),
+            'username' => env('TASK3_DB_USERNAME', 'root'),
+            'password' => env('TASK3_DB_PASSWORD', ''),
+            'unix_socket' => env('TASK3_DB_SOCKET', ''),
+            'charset' => env('TASK3_DB_CHARSET', 'utf8mb4'),
+            'collation' => env('TASK3_DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'foreign_key_constraints' => env('TASK3_DB_FOREIGN_KEYS', true),
+            'busy_timeout' => null,
+            'journal_mode' => null,
+            'synchronous' => null,
+            'strict' => true,
+            'engine' => null,
+        ],
+
     ],
 
     /*

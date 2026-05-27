@@ -1,0 +1,195 @@
+.task2-description {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: rgb(3 7 18);
+}
+
+.dark .task2-description {
+    color: rgb(255 255 255);
+}
+
+.task2-description-heading {
+    margin: 0 0 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(3 7 18);
+}
+
+.dark .task2-description-heading {
+    color: rgb(255 255 255);
+}
+
+.task2-description-list {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.task2-description-list li + li {
+    margin-top: 0.25rem;
+}
+
+.task2-description-note {
+    margin: 0;
+    color: rgb(75 85 99);
+}
+
+.dark .task2-description-note {
+    color: rgb(156 163 175);
+}
+
+.task2-section-gap {
+    margin-top: 1.5rem;
+}
+
+.task2-schema-diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.task2-schema-flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px dashed rgb(209 213 219);
+    background: rgb(249 250 251);
+}
+
+.dark .task2-schema-flow {
+    border-color: rgb(255 255 255 / 0.15);
+    background: rgb(255 255 255 / 0.03);
+}
+
+.task2-schema-node {
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(251 191 36);
+    background: rgb(255 251 235);
+    font-weight: 600;
+    color: rgb(146 64 14);
+    white-space: nowrap;
+}
+
+.dark .task2-schema-node {
+    border-color: rgb(245 158 11 / 0.5);
+    background: rgb(245 158 11 / 0.12);
+    color: rgb(253 230 138);
+}
+
+.task2-schema-node--center {
+    border-color: rgb(59 130 246);
+    background: rgb(239 246 255);
+    color: rgb(29 78 216);
+}
+
+.dark .task2-schema-node--center {
+    border-color: rgb(96 165 250 / 0.5);
+    background: rgb(59 130 246 / 0.12);
+    color: rgb(147 197 253);
+}
+
+.task2-schema-arrow {
+    color: rgb(107 114 128);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.dark .task2-schema-arrow {
+    color: rgb(156 163 175);
+}
+
+.task2-schema-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1rem;
+}
+
+.task2-schema-table {
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid rgb(229 231 235);
+    background: rgb(255 255 255);
+}
+
+.dark .task2-schema-table {
+    border-color: rgb(255 255 255 / 0.1);
+    background: rgb(255 255 255 / 0.03);
+}
+
+.task2-schema-table__header {
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid rgb(229 231 235);
+    background: rgb(249 250 251);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: rgb(17 24 39);
+}
+
+.dark .task2-schema-table__header {
+    border-color: rgb(255 255 255 / 0.1);
+    background: rgb(255 255 255 / 0.05);
+    color: rgb(243 244 246);
+}
+
+.task2-schema-table__body {
+    margin: 0;
+    padding: 0.5rem 0;
+    list-style: none;
+}
+
+.task2-schema-table__row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.3rem 0.875rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    color: rgb(55 65 81);
+}
+
+.dark .task2-schema-table__row {
+    color: rgb(209 213 219);
+}
+
+.task2-schema-table__key {
+    flex-shrink: 0;
+    min-width: 1.75rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: rgb(217 119 6);
+}
+
+.dark .task2-schema-table__key {
+    color: rgb(251 191 36);
+}
+
+.task2-schema-table__key--fk {
+    color: rgb(37 99 235);
+}
+
+.dark .task2-schema-table__key--fk {
+    color: rgb(96 165 250);
+}
+
+.task2-schema-table__comment {
+    margin-left: auto;
+    font-family: inherit;
+    font-size: 0.6875rem;
+    color: rgb(107 114 128);
+}
+
+.dark .task2-schema-table__comment {
+    color: rgb(156 163 175);
+}
